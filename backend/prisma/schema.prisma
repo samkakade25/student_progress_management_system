@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  phone String
+  codeforcesHandle String @unique
+  currentRating Int
+  maxRating Int
+  cfDataUpdatedAt DateTime?
+  reminderEmails Int @default(0)
+  emailReminders Boolean @default(true)
+
+  contests Contest[]
+  problemStats ProblemStat[]
+}
+
+model Contest {
+  id String @id @default(uuid())
+  studentId String
+  ratingChange Int
+  rank Int
+  problemsUnsolved Int
+  date DateTime
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model ProblemStat {
+  id String @id @default(uuid())
+  studentId String
+  date DateTime
+  rating Int
+  student Student @relation(fields: [studentId], references: [id])
+}
