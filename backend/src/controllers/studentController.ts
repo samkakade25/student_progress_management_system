@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { z } from "zod"
+import { syncCodeforcesData } from "../utils/syncCfData";
 
 const prisma = new PrismaClient()
 
@@ -27,4 +28,19 @@ export const createStudent = async (req: Request, res: Response) => {
     const data = result.data
     const student = await prisma.student.create({ data })
     res.json(student)
+}
+
+export const updateCfHandle = async (req: Request, res: Response) => {
+    const studentId = req.params.id
+    const { handle } = req.body
+
+    await prisma.student.update({
+        where: { id: studentId },
+        data: { codeforcesHandle: handle }
+    })
+
+    // Trigger sync immediately
+    await syncCodeforcesData(studentId, handle)
+
+    res.json({ message: "Handle updated and data synced" })
 }
